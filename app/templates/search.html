@@ -3,14 +3,42 @@
 
 <h1>Spell Search</h1>
 
-<input
-  type="text"
-  name="search"
-  hx-get="/search-spells"
-  hx-target="#results"
-  hx-trigger="keyup changed delay:200ms"
-  placeholder="Search Spells..."
-/>
+<form id="search-form" hx-get="/search-spells" hx-target="#results" hx-trigger="submit, keyup changed delay:200ms from:#search-input" hx-push-url="true">
+  <input
+    type="text"
+    id="search-input"
+    name="q"
+    placeholder="Search Spells..."
+    value="{{ request.query_params.get('q', '') }}"
+    hx-get="/search-spells"
+    hx-trigger="keyup changed delay:200ms"
+    hx-target="#results"
+    hx-push-url="?q=${this.value}"
+  />
+</form>
+
+<script>
+  // Update URL when searching
+  document.addEventListener('htmx:beforeRequest', function(evt) {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput && evt.detail.pathInfo.requestPath === '/search-spells') {
+      const params = new URLSearchParams(window.location.search);
+      params.set('q', searchInput.value);
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      window.history.pushState({}, '', newUrl);
+    }
+  });
+
+  // Handle back/forward navigation
+  window.addEventListener('popstate', function() {
+    const params = new URLSearchParams(window.location.search);
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.value = params.get('q') || '';
+      htmx.trigger(searchInput, 'keyup');
+    }
+  });
+</script>
 
 <div id="results"></div>
 

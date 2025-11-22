@@ -5,8 +5,23 @@ from app.database import spells
 router = APIRouter()
 
 @router.get("/search", response_class=HTMLResponse)
-async def search_page(request: Request):
-    return request.app.state.templates.TemplateResponse("search.html", {"request": request})
+async def search_page(request: Request, q: str = ""):
+    context = {
+        "request": request,
+        "spells": []
+    }
+    
+    if q:
+        # Reuse the search logic from search_spells
+        query = {"resource_type": "spells"}
+        regex = {"$regex": q, "$options": "i"}
+        query["$or"] = [
+            {"name": regex},
+            {"desc": regex}
+        ]
+        context["spells"] = list(spells.find(query).limit(20))
+    
+    return request.app.state.templates.TemplateResponse("search.html", context)
 
 @router.get("/search-spells", response_class=HTMLResponse)
 async def search_spells(request: Request, q: str = ""):
