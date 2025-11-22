@@ -24,7 +24,7 @@ async def login_page(request: Request):
     return request.app.state.templates.TemplateResponse("login.html", {"request": request})
 
 @router.post("/login")
-async def login_user(response: Response, username: str = Form(...), password: str = Form(...)):
+async def login_user(request: Request, response: Response, username: str = Form(...), password: str = Form(...)):
     user = users.find_one({"username": username})
     if not user or not verify_password(password, user["hashed_password"]):
         return RedirectResponse("/login?error=1", status_code=303)

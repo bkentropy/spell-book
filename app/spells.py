@@ -10,7 +10,18 @@ async def search_page(request: Request):
 
 @router.get("/search-spells", response_class=HTMLResponse)
 async def search_spells(request: Request, q: str = ""):
-    query = {"name": {"$regex": q, "$options": "i"}} if q else {}
+    # Base query always includes resource_type: "spells"
+    query = {"resource_type": "spells"}
+    
+    # Add regex search for name and desc if query is provided
+    if q:
+        regex = {"$regex": q, "$options": "i"}
+        query["$or"] = [
+            {"name": regex},
+            {"desc": regex}
+        ]
+    
+    # Get results with limit
     results = list(spells.find(query).limit(20))
 
     return request.app.state.templates.TemplateResponse(

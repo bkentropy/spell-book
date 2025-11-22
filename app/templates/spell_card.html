@@ -1,8 +1,67 @@
 {% for spell in spells %}
 <div class="spell-card">
-  <h3>{{ spell.name }}</h3>
-  <p><strong>Level:</strong> {{ spell.level }}</p>
-  <p><strong>School:</strong> {{ spell.school }}</p>
-  <p>{{ spell.description }}</p>
+  <div class="spell-header">
+    <h3>{{ spell.name }}</h3>
+    <div class="spell-meta">
+      <span class="spell-level">Level {{ spell.level }}</span>
+      <span class="spell-school">
+        {% if spell.school is string %}
+          {{ spell.school }}
+        {% else %}
+          {{ spell.school.name }}
+        {% endif %}
+      </span>
+    </div>
+  </div>
+  
+  <div class="spell-details">
+    <p><strong>Casting Time:</strong> {{ spell.casting_time }}</p>
+    <p><strong>Range:</strong> {{ spell.range }}</p>
+    <p><strong>Components:</strong> 
+      {{ ', '.join(spell.components) }}
+      {% if spell.material %}({{ spell.material }}){% endif %}
+    </p>
+    <p><strong>Duration:</strong> 
+      {{ spell.duration }}{% if spell.concentration %}, Concentration{% endif %}
+    </p>
+  </div>
+  
+  <div class="spell-description">
+    {% for paragraph in spell.desc %}
+      <p>{{ paragraph }}</p>
+    {% endfor %}
+    
+    {% if spell.higher_level %}
+      <div class="higher-level">
+        <strong>At Higher Levels:</strong>
+        {% for paragraph in spell.higher_level %}
+          <p>{{ paragraph }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  
+  {% if spell.damage %}
+  <div class="spell-damage">
+    <p><strong>Damage Type:</strong> {{ spell.damage.damage_type.name }}</p>
+    {% if spell.damage.damage_at_slot_level %}
+      <div class="damage-levels">
+        <strong>Damage by Spell Level:</strong>
+        <ul>
+          {% for level, damage in spell.damage.damage_at_slot_level.items() %}
+            <li>Level {{ level }}: {{ damage }} {{ spell.damage.damage_type.name }} damage</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  <div class="spell-classes">
+    <strong>Available to:</strong>
+    {% for class in spell.classes %}
+      <span class="class-badge">{{ class.name }}</span>
+    {% endfor %}
+  </div>
 </div>
 {% endfor %}
