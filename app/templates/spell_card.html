@@ -41,10 +41,10 @@
     {% endif %}
   </div>
   
-  {% if spell.damage %}
+  {% if spell.damage and spell.damage.damage_type and spell.damage.damage_type.name %}
   <div class="spell-damage">
     <p><strong>Damage Type:</strong> {{ spell.damage.damage_type.name }}</p>
-    {% if spell.damage.damage_at_slot_level %}
+    {% if spell.damage.damage_at_slot_level and spell.damage.damage_at_slot_level is mapping %}
       <div class="damage-levels">
         <strong>Damage by Spell Level:</strong>
         <ul>
