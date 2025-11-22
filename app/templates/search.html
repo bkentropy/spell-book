@@ -17,11 +17,31 @@
   />
 </form>
 
+<div id="results">
+  <!-- Search results will be inserted here by HTMX -->
+  {% if request.query_params.get('q') %}
+    {% include "spell_card.html" %}
+  {% endif %}
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('search-input');
     const searchForm = document.getElementById('search-form');
-
+    const resultsDiv = document.getElementById('results');
+    
+    // Trigger search on page load if there's a query parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchQuery = urlParams.get('q');
+    
+    if (searchQuery) {
+      // Set the input value
+      searchInput.value = searchQuery;
+      
+      // Trigger the search
+      htmx.trigger(searchForm, 'submit');
+    }
+    
     // Update URL when searching
     searchInput.addEventListener('input', function() {
       const params = new URLSearchParams();

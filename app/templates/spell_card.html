@@ -122,10 +122,10 @@
 </style>
 
 <script>
-function toggleSpellDetails(header) {
+function toggleSpellDetails(header, forceExpand = false) {
   const card = header.parentElement;
   const details = header.nextElementSibling;
-  const isExpanded = card.classList.toggle('expanded');
+  const isExpanded = forceExpand || card.classList.toggle('expanded');
   
   if (isExpanded) {
     details.style.display = 'block';
@@ -133,31 +133,64 @@ function toggleSpellDetails(header) {
     const fullHeight = details.scrollHeight + 'px';
     details.style.height = '0';
     // Trigger reflow
-    details.offsetHeight;
+    void details.offsetHeight; // This forces a reflow
     // Animate to full height
     details.style.height = fullHeight;
+    
+    // After animation completes, set height to auto to handle window resizing
+    setTimeout(() => {
+      if (card.classList.contains('expanded') || forceExpand) {
+        details.style.height = 'auto';
+      }
+    }, 300);
   } else {
     // Collapse
     details.style.height = details.scrollHeight + 'px';
     // Trigger reflow
-    details.offsetHeight;
+    void details.offsetHeight; // This forces a reflow
     details.style.height = '0';
     // After animation completes, set display to none
     setTimeout(() => {
-      if (!card.classList.contains('expanded')) {
+      if (!card.classList.contains('expanded') && !forceExpand) {
         details.style.display = 'none';
       }
     }, 300);
   }
+  
+  // Update ARIA attributes for accessibility
+  const button = header.querySelector('.toggle-details');
+  if (button) {
+    button.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+  }
 }
 
-// Close all details by default when page loads
+// Initialize all collapsible sections
 document.addEventListener('DOMContentLoaded', function() {
-  // All details will be hidden by default due to inline style
-  // We need to set the initial height to 0 for the animation to work
+  // Check if we have a search query in the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const hasSearchQuery = urlParams.has('q');
+  
   document.querySelectorAll('.spell-details').forEach(details => {
+    // Set initial state
     details.style.height = '0';
     details.style.display = 'none';
+    
+    // If this is a search result page with a query, expand the first result
+    if (hasSearchQuery && details === document.querySelector('.spell-details')) {
+      // Small delay to ensure all elements are properly initialized
+      setTimeout(() => {
+        const header = details.previousElementSibling;
+        if (header && header.classList.contains('spell-header')) {
+          toggleSpellDetails(header, true);
+        }
+      }, 50);
+    }
   });
+  
+  // Update the search input with the current query
+  const searchInput = document.querySelector('input[name="q"]');
+  if (searchInput && hasSearchQuery) {
+    searchInput.value = urlParams.get('q');
+  }
 });
 </script>
