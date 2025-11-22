@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Spell Search</h1>
+
+<input
+  type="text"
+  name="search"
+  hx-get="/search-spells"
+  hx-target="#results"
+  hx-trigger="keyup changed delay:200ms"
+  placeholder="Search Spells..."
+/>
+
+<div id="results"></div>
+
+{% endblock %}

@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+jinja2
+python-multipart
+passlib[bcrypt]
+pydantic
+pymongo
+htmx
+python-dotenv
+bcrypt

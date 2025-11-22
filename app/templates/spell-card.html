@@ -1,0 +1,8 @@
+{% for spell in spells %}
+<div class="spell-card">
+  <h3>{{ spell.name }}</h3>
+  <p><strong>Level:</strong> {{ spell.level }}</p>
+  <p><strong>School:</strong> {{ spell.school }}</p>
+  <p>{{ spell.description }}</p>
+</div>
+{% endfor %}
