@@ -1,67 +1,163 @@
 {% for spell in spells %}
 <div class="spell-card">
-  <div class="spell-header">
-    <h3>{{ spell.name }}</h3>
-    <div class="spell-meta">
-      <span class="spell-level">Level {{ spell.level }}</span>
-      <span class="spell-school">
-        {% if spell.school is string %}
-          {{ spell.school }}
-        {% else %}
-          {{ spell.school.name }}
-        {% endif %}
-      </span>
+  <div class="spell-header" onclick="toggleSpellDetails(this)">
+    <div class="spell-header-content">
+      <h3>{{ spell.name }}</h3>
+      <div class="spell-meta">
+        <span class="spell-level">Level {{ spell.level }}</span>
+        <span class="spell-school">
+          {% if spell.school is string %}
+            {{ spell.school }}
+          {% else %}
+            {{ spell.school.name }}
+          {% endif %}
+        </span>
+      </div>
     </div>
+    <button class="toggle-details" aria-label="Toggle spell details">
+      <span class="toggle-icon">▼</span>
+    </button>
   </div>
   
-  <div class="spell-details">
-    <p><strong>Casting Time:</strong> {{ spell.casting_time }}</p>
-    <p><strong>Range:</strong> {{ spell.range }}</p>
-    <p><strong>Components:</strong> 
-      {{ ', '.join(spell.components) }}
-      {% if spell.material %}({{ spell.material }}){% endif %}
-    </p>
-    <p><strong>Duration:</strong> 
-      {{ spell.duration }}{% if spell.concentration %}, Concentration{% endif %}
-    </p>
-  </div>
-  
-  <div class="spell-description">
-    {% for paragraph in spell.desc %}
-      <p>{{ paragraph }}</p>
-    {% endfor %}
+  <div class="spell-details" style="display: none;">
+    <div class="spell-basics">
+      <p><strong>Casting Time:</strong> {{ spell.casting_time }}</p>
+      <p><strong>Range:</strong> {{ spell.range }}</p>
+      <p><strong>Components:</strong> 
+        {{ ', '.join(spell.components) }}
+        {% if spell.material %}({{ spell.material }}){% endif %}
+      </p>
+      <p><strong>Duration:</strong> 
+        {{ spell.duration }}{% if spell.concentration %}, Concentration{% endif %}
+      </p>
+    </div>
+    
+    <div class="spell-description">
+      <h4>Description:</h4>
+      {% for paragraph in spell.desc %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </div>
     
     {% if spell.higher_level %}
       <div class="higher-level">
-        <strong>At Higher Levels:</strong>
+        <h4>At Higher Levels:</h4>
         {% for paragraph in spell.higher_level %}
           <p>{{ paragraph }}</p>
         {% endfor %}
       </div>
     {% endif %}
-  </div>
-  
-  {% if spell.damage and spell.damage.damage_type and spell.damage.damage_type.name %}
-  <div class="spell-damage">
-    <p><strong>Damage Type:</strong> {{ spell.damage.damage_type.name }}</p>
-    {% if spell.damage.damage_at_slot_level and spell.damage.damage_at_slot_level is mapping %}
-      <div class="damage-levels">
-        <strong>Damage by Spell Level:</strong>
-        <ul>
-          {% for level, damage in spell.damage.damage_at_slot_level.items() %}
-            <li>Level {{ level }}: {{ damage }} {{ spell.damage.damage_type.name }} damage</li>
-          {% endfor %}
-        </ul>
-      </div>
+    
+    {% if spell.damage and spell.damage.damage_type and spell.damage.damage_type.name %}
+    <div class="spell-damage">
+      <h4>Damage Information:</h4>
+      <p><strong>Damage Type:</strong> {{ spell.damage.damage_type.name }}</p>
+      {% if spell.damage.damage_at_slot_level and spell.damage.damage_at_slot_level is mapping %}
+        <div class="damage-levels">
+          <p><strong>Damage by Spell Level:</strong></p>
+          <ul>
+            {% for level, damage in spell.damage.damage_at_slot_level.items() %}
+              <li>Level {{ level }}: {{ damage }} {{ spell.damage.damage_type.name }} damage</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
     {% endif %}
-  </div>
-  {% endif %}
-  
-  <div class="spell-classes">
-    <strong>Available to:</strong>
-    {% for class in spell.classes %}
-      <span class="class-badge">{{ class.name }}</span>
-    {% endfor %}
+    
+    {% if spell.classes %}
+    <div class="spell-classes">
+      <h4>Available to:</h4>
+      <p>{{ spell.classes|join(', ') }}</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endfor %}
+
+<style>
+.spell-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.spell-header:hover {
+  background-color: #e9e9e9;
+}
+
+.spell-header-content {
+  flex-grow: 1;
+}
+
+.toggle-details {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  border-radius: 4px;
+  transition: transform 0.2s ease;
+}
+
+.spell-card.expanded .toggle-details .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.spell-details {
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background-color: #fafafa;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+</style>
+
+<script>
+function toggleSpellDetails(header) {
+  const card = header.parentElement;
+  const details = header.nextElementSibling;
+  const isExpanded = card.classList.toggle('expanded');
+  
+  if (isExpanded) {
+    details.style.display = 'block';
+    // Set height to auto to get the full height
+    const fullHeight = details.scrollHeight + 'px';
+    details.style.height = '0';
+    // Trigger reflow
+    details.offsetHeight;
+    // Animate to full height
+    details.style.height = fullHeight;
+  } else {
+    // Collapse
+    details.style.height = details.scrollHeight + 'px';
+    // Trigger reflow
+    details.offsetHeight;
+    details.style.height = '0';
+    // After animation completes, set display to none
+    setTimeout(() => {
+      if (!card.classList.contains('expanded')) {
+        details.style.display = 'none';
+      }
+    }, 300);
+  }
+}
+
+// Close all details by default when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // All details will be hidden by default due to inline style
+  // We need to set the initial height to 0 for the animation to work
+  document.querySelectorAll('.spell-details').forEach(details => {
+    details.style.height = '0';
+    details.style.display = 'none';
+  });
+});
+</script>
