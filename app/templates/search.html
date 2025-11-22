@@ -11,7 +11,7 @@
     placeholder="Search Spells..."
     value="{{ request.query_params.get('q', '') }}"
     hx-get="/search"
-    hx-trigger="keyup changed delay:200ms"
+    hx-trigger="keyup changed delay:300ms"
     hx-target="#results"
     hx-push-url="true"
   />
