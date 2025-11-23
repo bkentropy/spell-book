@@ -19,41 +19,47 @@ class EmbeddingClient:
         return response.json()
 
 
-# # -----------------------------
-# # 3. Process documents
-# # -----------------------------
-# def embed_all_spell_descriptions(batch_size=50):
-#     docs = collection.find(
-#         {"desc": {"$exists": True}, "desc_embedding": {"$exists": False}},
-#         {"_id": 1, "desc": 1},
-#         batch_size=batch_size
-#     )
+    def embed_all_spell_descriptions(self, collection, batch_size=50):
+        docs = collection.find(
+            {
+                "desc": {"$exists": True},
+                "desc_embedding": {"$exists": False},
+                "resource_type": "spells"
+            },
+            {"_id": 1, "desc": 1},
+            batch_size=batch_size
+        )
 
-#     count = 0
+        count = 0
 
-#     for doc in docs:
-#         spell_id = doc["_id"]
-#         desc_text = doc["desc"]
+        for doc in docs:
+            spell_id = doc["_id"]
+            desc_text = doc["desc"]
+            
+            # Handle both string and array types for desc_text
+            if isinstance(desc_text, list):
+                # Join list of strings with spaces if it's an array
+                desc_text = ' '.join(str(p) for p in desc_text if p)
+            
+            # Convert to string and strip whitespace
+            desc_text = str(desc_text).strip()
+            
+            if not desc_text:
+                continue
 
-#         if not desc_text.strip():
-#             continue
+            print(f"Embedding spell {spell_id}...")
 
-#         print(f"Embedding spell {_id}...")
+            # # ---- Embed text ----
+            # embedding = self.get_embedding(desc_text)
 
-#         # ---- Embed text ----
-#         embedding = get_embedding(desc_text)
+            # # ---- Store back into Mongo ----
+            # collection.update_one(
+            #     {"_id": spell_id},
+            #     {"$set": {"desc_embedding": embedding}}
+            # )
 
-#         # ---- Store back into Mongo ----
-#         collection.update_one(
-#             {"_id": spell_id},
-#             {"$set": {"desc_embedding": embedding}}
-#         )
+            # count += 1
+            # time.sleep(0.1)  # gentle rate-limiting
 
-#         count += 1
-#         time.sleep(0.1)  # gentle rate-limiting
+        print(f"Done. Embedded {count} documents.")
 
-#     print(f"Done. Embedded {count} documents.")
-
-
-# if __name__ == "__main__":
-#     embed_all_spell_descriptions()
