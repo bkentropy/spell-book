@@ -8,3 +8,4 @@ pymongo
 htmx
 python-dotenv
 bcrypt
+requests
