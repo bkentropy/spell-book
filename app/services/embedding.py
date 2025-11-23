@@ -1,5 +1,6 @@
 import os
 import requests
+import time
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -49,17 +50,17 @@ class EmbeddingClient:
 
             print(f"Embedding spell {spell_id}...")
 
-            # # ---- Embed text ----
-            # embedding = self.get_embedding(desc_text)
+            # ---- Embed text ----
+            embedding = self.get_embedding(desc_text).get("embeddings")
 
-            # # ---- Store back into Mongo ----
-            # collection.update_one(
-            #     {"_id": spell_id},
-            #     {"$set": {"desc_embedding": embedding}}
-            # )
+            # ---- Store back into Mongo ----
+            collection.update_one(
+                {"_id": spell_id},
+                {"$set": {"desc_embedding": embedding}}
+            )
 
-            # count += 1
-            # time.sleep(0.1)  # gentle rate-limiting
+            count += 1
+            time.sleep(0.1)  # gentle rate-limiting
 
         print(f"Done. Embedded {count} documents.")
 

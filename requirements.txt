@@ -9,3 +9,4 @@ htmx
 python-dotenv
 bcrypt
 requests
+ipython
