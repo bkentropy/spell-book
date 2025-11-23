@@ -69,7 +69,7 @@ class EmbeddingClient:
                     continue
                     
                 # Get embedding for this document
-                embedding = self.get_embedding(desc_text).get("embeddings")
+                embedding = self.get_embedding(desc_text).get("embeddings")[0]
                 
                 # Add to batch
                 batch.append((spell_id, embedding))
