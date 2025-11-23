@@ -1,13 +1,45 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="theme-color" content="#4a6fa5">
+  <meta name="description" content="Search and browse D&D 5e spells">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>D&D Spell Search</title>
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   <link rel="stylesheet" href="/static/styles.css">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192x192.png">
 </head>
 <body>
-  <div class="container">
+  <header>
+    <div class="container">
+      <h1>D&D Spell Search</h1>
+    </div>
+  </header>
+  
+  <main class="container">
     {% block content %}{% endblock %}
-  </div>
+  </main>
+  
+  <footer class="mt-2">
+    <div class="container">
+      <p class="text-center">D&D 5e Spell Database</p>
+    </div>
+  </footer>
+  
+  <script>
+    // Enable touch feedback on mobile
+    document.addEventListener('touchstart', function() {}, true);
+    
+    // Handle PWA installation
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      window.deferredPrompt = e;
+    });
+  </script>
 </body>
 </html>

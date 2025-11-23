@@ -1,27 +1,45 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h1>Spell Search</h1>
+<div class="search-container">
+  <form id="search-form" hx-get="/search" hx-target="#results" hx-trigger="submit" hx-push-url="true" class="mb-2">
+    <div class="search-input-container">
+      <input
+        type="search"
+        id="search-input"
+        name="q"
+        placeholder="Search spells by name or description..."
+        value="{{ request.query_params.get('q', '') }}"
+        hx-get="/search"
+        hx-trigger="keyup changed delay:300ms"
+        hx-target="#results"
+        hx-push-url="true"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        aria-label="Search spells"
+      />
+      <button type="submit" class="search-button" aria-label="Search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </button>
+    </div>
+  </form>
 
-<form id="search-form" hx-get="/search" hx-target="#results" hx-trigger="submit" hx-push-url="true">
-  <input
-    type="text"
-    id="search-input"
-    name="q"
-    placeholder="Search Spells..."
-    value="{{ request.query_params.get('q', '') }}"
-    hx-get="/search"
-    hx-trigger="keyup changed delay:300ms"
-    hx-target="#results"
-    hx-push-url="true"
-  />
-</form>
-
-<div id="results">
-  <!-- Search results will be inserted here by HTMX -->
-  {% if request.query_params.get('q') %}
-    {% include "spell_card.html" %}
-  {% endif %}
+  <div id="results">
+    <!-- Search results will be inserted here by HTMX -->
+    {% if request.query_params.get('q') %}
+      {% include "spell_card.html" %}
+    {% else %}
+      <div class="search-prompt">
+        <p>Search for D&D 5e spells by name, school, level, or description.</p>
+        <p class="mt-1">Example: "fireball", "conjuration", "level 3", "healing spell"</p>
+      </div>
+    {% endif %}
+  </div>
 </div>
 
 <script>
@@ -29,6 +47,14 @@
     const searchInput = document.getElementById('search-input');
     const searchForm = document.getElementById('search-form');
     const resultsDiv = document.getElementById('results');
+    
+    // Focus search input on page load (for better mobile UX)
+    if (searchInput) {
+      // Small delay to ensure the virtual keyboard doesn't interfere with page rendering
+      setTimeout(() => {
+        searchInput.focus({ preventScroll: true });
+      }, 100);
+    }
     
     // Trigger search on page load if there's a query parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -43,14 +69,29 @@
     }
     
     // Update URL when searching
-    searchInput.addEventListener('input', function() {
+    const updateUrl = () => {
       const params = new URLSearchParams();
-      params.set('q', this.value);
+      params.set('q', searchInput.value);
       const newUrl = `${window.location.pathname}?${params.toString()}`;
-      history.pushState({}, '', newUrl);
+      history.replaceState({}, '', newUrl);
+    };
+    
+    // Debounce the URL update
+    let debounceTimer;
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(updateUrl, 300);
     });
-
+    
     // Handle back/forward navigation
+    window.addEventListener('popstate', function() {
+      const params = new URLSearchParams(window.location.search);
+      const newSearchQuery = params.get('q') || '';
+      if (searchInput.value !== newSearchQuery) {
+        searchInput.value = newSearchQuery;
+        htmx.trigger(searchForm, 'submit');
+      }
+    });
     window.addEventListener('popstate', function() {
       const params = new URLSearchParams(window.location.search);
       if (searchInput) {
