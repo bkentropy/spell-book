@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - EMBEDDING_SERVICE_URL=http://host.docker.internal:8001  # For local development
+    volumes:
+      - .:/app
