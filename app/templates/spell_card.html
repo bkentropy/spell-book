@@ -68,7 +68,23 @@
     {% if spell.classes %}
     <div class="spell-classes">
       <h4>Available to:</h4>
-      <p>{{ spell.classes|join(', ') }}</p>
+      <p>
+        {% if spell.classes is string %}
+          {{ spell.classes }}
+        {% elif spell.classes is mapping %}
+          {{ spell.classes.name }}
+        {% elif spell.classes is iterable %}
+          {% for class in spell.classes %}
+            {% if class is mapping %}
+              {{ class.name }}{% if not loop.last %}, {% endif %}
+            {% else %}
+              {{ class }}{% if not loop.last %}, {% endif %}
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          {{ spell.classes }}
+        {% endif %}
+      </p>
     </div>
     {% endif %}
   </div>
