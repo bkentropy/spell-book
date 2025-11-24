@@ -169,13 +169,14 @@ header {
 }
 
 .spell-details {
-  max-height: 0;
+  height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease;
+  transition: height 0.3s ease;
 }
 
 .spell-details.expanded {
-  max-height: 2000px; /* Adjust based on content */
+  height: auto;
+  min-height: 0;
 }
 
 .spell-description {
